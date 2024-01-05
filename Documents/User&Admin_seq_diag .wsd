@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @startuml UserSequenceDiagram
 title User Sequence Diagram
 
@@ -109,4 +110,117 @@ end
 
 
 
+=======
+@startuml UserSequenceDiagram
+title User Sequence Diagram
+
+
+participant UserStart
+participant client
+participant Admin
+participant User
+participant Server
+participant Database
+
+UserStart -> client
+
+alt client log as Admin
+    
+
+    alt client Log as Admin 
+    Loop
+    Admin -> Server: Login()
+    Server -> Database: Authentication()
+       alt valid admin
+        Database -> Server : Authenticated
+        break
+        Server -> Admin : start() 
+        end
+    else invalid Name or password
+        Database -> Server : Authentication failed
+        Server -> Admin : Authentication failed
+        ' loop 3 times Retry until Authentication succeeds
+            Admin -> Server: Retry Login()
+            Server -> Database: Retry Authentication()
+            alt if Not authenticated
+            Database -> Server : Authentication failed ()
+
+            ' alt if Not authenticated
+            Server -> Admin : Authentication failed
+            else if Authenticated
+            Database -> Server : Authenticated
+            break
+            Server -> Admin : start()
+            
+            end
+
+
+    end
+
+    end
+end
+    Admin -> Server: sendrequesttoserver()
+    Server -> Server: ProcessRequest()
+    Server -> Database: RetrieveData()
+    Database -> Server : Data()
+    Server -> Admin: SendResponse()
+
+
+    Admin -> Server: sendrequesttoserver()
+    Server -> Server: ProcessRequest()
+    Server -> Database: RetrieveData()
+    Database -> Server : Data()
+    Server -> Admin: SendResponse()
+    Admin --> Server: Other Admin Functions...
+' ===========================User============================
+  else client log as User
+     
+    Loop
+    User -> Server: Login()
+    Server -> Database: Authentication()
+       alt valid User
+        Database -> Server : Authenticated
+        break
+        Server -> User : start() 
+        end
+    else invalid Name or password
+        Database -> Server : Authentication failed
+        Server -> User : Authentication failed
+        ' loop 3 times Retry until Authentication succeeds
+            User -> Server: Retry Login()
+            Server -> Database: Retry Authentication()
+           alt if Not athunticated
+            Database -> Server : Authentication failed()
+
+            ' alt if Not authenticated
+            Server -> User : Authentication failed
+            else if Authenticated
+            Database -> Server : Authenticated()
+            break
+            Server -> User : start()
+            end
+
+
+    end
+    end 
+end
+    User -> Server: sendrequesttoserver()
+    Server -> Server: ProcessRequest()
+    Server -> Database: RetrieveData()
+    Database -> Server : Data()
+    Server -> User: SendResponse()
+
+
+    User -> Server: sendrequesttoserver()
+    Server -> Server: ProcessRequest()
+    Server -> Database: RetrieveData()
+    Database -> Server : Data()
+    Server -> User: SendResponse()
+    User --> Server: Other Admin Functions...
+
+end
+
+
+
+>>>>>>> origin/main
 @enduml
