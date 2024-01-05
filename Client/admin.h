@@ -17,6 +17,7 @@ public:
     void CreatNewUser();
     void DeleteUser();
     void UpdateUser();
+     void SendUserCreationRequest(const QString&, const QString&, const QVariantMap&);
 
 signals:
 public slots:
@@ -32,6 +33,7 @@ private:
     QTcpSocket _socket;
     QDataStream oStream;
     QDataStream iStream;
+    QString _admin;
 
 };
 

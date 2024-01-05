@@ -155,10 +155,9 @@ bool User::Login()
     QTextStream inputStream(stdin);
     QTextStream outputStream(stdout);
 
-    qInfo() << "WELCOME!!" << Qt::endl;
-    qInfo()<< "Username: "<< Qt::endl;;
+    qDebug() << "WELCOME" << Qt::endl;
+    qDebug()<< "Username: "<< Qt::endl;;
     _request = "Login";
-    // outStream << _request << _role;
 
     QString userName;
     QString password;
@@ -167,7 +166,7 @@ bool User::Login()
 
     _userName = userName;
 
-    qInfo() << "Password: "<<Qt::endl;
+    qDebug() << "Password: "<<Qt::endl;
 
     inputStream >> password;
 
@@ -189,7 +188,7 @@ bool User::Login()
     }
 
     StartNew();
-    // qInfo()<<"asdasd";
+    // qDebug()<<"asdasd";
     return true ;
 }
 
@@ -216,18 +215,28 @@ void User::Start(bool& isLogged)
     {
     case 1:
         _request = "View Account";
+        SendReqToServer();
+
         break;
     case 2:
         _request = "View Transaction History";
+        SendReqToServer();
+
         break;
     case 3:
         _request = "Get Account Number";
+        SendReqToServer();
+
         break;
     case 4:
         _request = "Transfer Account";
+        SendReqToServer();
+
         break;
     case 5:
         _request = "Make Transaction";
+        SendReqToServer();
+
         break;
     case 6:
         isLogged = false;
@@ -259,7 +268,7 @@ void User::Start(bool& isLogged)
 void User::connectToHost(QString host, quint16 port)
 {
     if(_socket.isOpen()) disconnect();
-    //qInfo()<<"connecting to host"<<host<<"on port:"<<port;
+    //qDebug()<<"connecting to host"<<host<<"on port:"<<port;
     _socket.connectToHost(host,port);
 }
 
@@ -279,8 +288,8 @@ void User::connected()
 
 void User::disconnected()
 {
-    qInfo()<<"Thank you!...system is closing";
-    qInfo()<<"Disconnected";
+    qDebug()<<"Thank you!...system is closing";
+    qDebug()<<"Disconnected";
 }
 
 void User::error(QAbstractSocket::SocketError socketerror)

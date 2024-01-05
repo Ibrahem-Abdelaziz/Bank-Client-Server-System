@@ -14,12 +14,10 @@ int main(int argc, char *argv[])
 
     QString role;
 
-    qInfo() << "Welcome to the bank system\nPlease choose \"user\", \"admin\", or \"exit\": ";
+    qDebug() << "Welcome to the bank system\ncan you choose your role  \"user\", \"admin\", or you can exit: ";
     QString clientRole;
     inStream >> clientRole;
-
-    std::string roleStdString = clientRole.toStdString();
-    role = QString::fromStdString(roleStdString);
+    role = clientRole.toStdString().c_str();
 
     if (role.toUpper() == "USER")
     {
@@ -48,16 +46,15 @@ int main(int argc, char *argv[])
     }
     else if (role.toUpper() == "EXIT")
     {
-        outStream << "Thank you! The system is closing..." <<Qt:: endl;
-        // No need for exit(0); just let the main function return
+        outStream << "Thank you for using our Bank ... See you soon" <<Qt:: endl;
         return a.exec();
     }
     else
     {
-        outStream << "Sorry, you've entered invalid input." <<Qt:: endl;
+        outStream << "Sorry, you've entered invalid input" <<Qt:: endl;
     }
 
-    outStream << "BYE...BYE" << Qt::endl;
+    outStream << "Thank you for using our Bank ... See you soon " << Qt::endl;
 
     return a.exec();
 }
