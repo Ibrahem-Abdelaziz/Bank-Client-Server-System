@@ -7,28 +7,31 @@ class Admin : public Client
 {
 public:
     explicit Admin();
-    void ViewAccount();
-    void GetAccNo();
-    void ViewBankDatabase();
-    void CreateNewUser();
-    void Deleteuser();
+    void GetAccNum();
+    void ViewAccBalance();
+    void ViewTransHistory();
+    void SendReqToServer();
+    bool Login ();
+    void Start(bool&);
+    void ViewDatabase();
+    void CreatNewUser();
+    void DeleteUser();
     void UpdateUser();
-    void ViewTransactionHistory();
-    void sendrequesttoserver(QString request);
-    bool Login();
 
 signals:
 public slots:
-    void connectToHost(QString host,quint16 port);
+    void connectToHost(QString host , quint32 port );
     void disconnect();
 protected slots:
     void connected();
     void disconnected();
-    void error(QAbstractSocket::SocketError socketerror);
+    void error (QAbstractSocket::SocketError socketerror);
     void stateChanged(QAbstractSocket::SocketState socketstate);
     void readyRead();
 private:
-        QTcpSocket socket;
+    QTcpSocket _socket;
+    QDataStream oStream;
+    QDataStream iStream;
 
 };
 

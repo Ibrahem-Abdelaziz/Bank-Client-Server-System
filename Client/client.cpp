@@ -10,22 +10,9 @@ Client::Client(QObject *parent)
 }
 
 
+void Client::StartNew()
+{
+    system("cls");
+}
 
-// void Client::Login(QString username,QString password)
-// {
-//     bool isvalid = false;
-//     // do
-//     // {
-//     //     qInfo()<<"Please Enter Your Role `user` or `admin` ";
-//     //     QTextStream qin(stdin);
-//     //     role = qin.readLine();
-//     //     qInfo()<<"username: ";
-//     //     username = qin.readLine();
-//     //     qInfo()<<"Password: ";
-//     //     password = qin.readLine();
-//     //     isvalid =true;
-//     // }
-//     // while(!isvalid);
-
-// }
 

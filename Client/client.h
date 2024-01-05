@@ -5,22 +5,25 @@
 #include <QTcpSocket>
 #include <QAbstractSocket>
 #include <QMetaEnum>
+#include <windows.h>
 
 class Client : public QObject
 {
     Q_OBJECT
 public:
    explicit Client(QObject *parent = nullptr);
-   virtual void GetAccNo()=0;
-   virtual void ViewAccount()=0;
-   virtual void ViewTransactionHistory()=0;
-   virtual void sendrequesttoserver(QString request)=0;
-   virtual bool Login()=0;
+    virtual void GetAccNum()=0;
+    virtual void ViewAccBalance()=0;
+    virtual void ViewTransHistory()=0;
+    virtual void SendReqToServer()=0;
+    virtual bool Login () = 0 ;
+    void StartNew();
 
  protected:
-    QString m_role;
-    QString m_request;
-    QVariant m_serverrespond;
+    QString _role ;
+    QString _request;
+    QVariant _serverresponse;
+
 
 };
 
