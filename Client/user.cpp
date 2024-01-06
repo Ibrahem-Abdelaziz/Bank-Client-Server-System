@@ -10,6 +10,8 @@ User::User()
     iStream.setDevice(&_socket);
     iStream.setVersion(QDataStream::Qt_6_6);
     _role = "user";
+    _request="Login";
+    reqflag="General";
     connect(&_socket,&QTcpSocket::connected,this,&User::connected);
     connect(&_socket,&QTcpSocket::disconnected,this,&User::disconnected);
     connect(&_socket,&QTcpSocket::stateChanged,this,&User::stateChanged);
@@ -180,8 +182,8 @@ bool User::Login()
         if (!userName.isEmpty() && !password.isEmpty())
         {
             outputStream << userName << password;
-            _socket.waitForBytesWritten();
-            _socket.waitForReadyRead();
+            bool written = _socket.waitForBytesWritten();
+            bool ready = _socket.waitForReadyRead();
             ok = _serverresponse.toBool();
             break;
         }

@@ -19,15 +19,20 @@ int main(int argc, char *argv[])
     inStream >> clientRole;
     role = clientRole.toStdString().c_str();
 
+    bool isLogged =false;
     if (role.toUpper() == "USER")
     {
         User user;
         user.connectToHost("127.0.0.1", 1234);
-        user.StartNew();
-        bool isLogged = user.Login();
-        user.StartNew();
-        outStream << "Welcome ";
-        while (isLogged)
+        while (!isLogged)
+        {
+            isLogged = user.Login();
+            user.StartNew();
+            if(!isLogged)
+                qInfo("Username or Password is wrong!!\nPlease Try Again");
+        }
+
+        while(isLogged)
         {
             user.Start(isLogged);
         }
@@ -36,10 +41,15 @@ int main(int argc, char *argv[])
     {
         Admin admin;
         admin.connectToHost("127.0.0.1", 1234);
-        bool isLogged = admin.Login();
-        admin.StartNew();
-        outStream << "Welcome ";
-        while (isLogged)
+        while (!isLogged)
+        {
+            isLogged = admin.Login();
+            admin.StartNew();
+            if(!isLogged)
+                qInfo("Username or Password is wrong!!\nPlease Try Again");
+        }
+
+        while(isLogged)
         {
             admin.Start(isLogged);
         }

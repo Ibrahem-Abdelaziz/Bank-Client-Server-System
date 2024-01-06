@@ -13,16 +13,22 @@ class DataBase : public QObject
 public:
     explicit DataBase(QObject *parent = nullptr);
     bool checkLogin(QString ,QString);
-    qint32 ViewAccBalance(QString);
-    QString GetAccNum(QString);
-    bool TransAcc(QString,quint32);
-    bool GetField(QString,QString,QString&);
+    qint32 ViewAccountBalance(QString);
+    QString GetAccNo(QString);
+    bool TransferAmount(QString,quint32);
+	QString GetField(QString accountNumber, QString jsonField);
     bool UpdateField(QString,QString,QString);
     bool MakeTransaction(qint32);
     void SaveTransaction(QString,QString&);
-    QString ViewTransHistory(QString,quint16);
-    void checkDataBase();
-    bool checkField(QString);
+    QString ViewTransactionHistory(QString,quint16);
+    bool checkAccNo(QString);
+    bool checkField(QString ,QString);
+    bool UpdateUser(QString ,QVariantMap);
+    bool CreateUser(QString,QString,QVariantMap);
+    bool checkUsername(QString);
+    bool DeleteUser(QString);
+    QString ViewBankDataBase();
+
 
     QString role() const;
     void setRole(const QString &newRole);
