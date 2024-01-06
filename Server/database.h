@@ -12,20 +12,20 @@ class DataBase : public QObject
     Q_OBJECT
 public:
     explicit DataBase(QObject *parent = nullptr);
-    bool checkLogin(QString ,QString);
-    qint32 ViewAccountBalance(QString);
-    QString GetAccNo(QString);
+    bool CheckLogin(QString ,QString);
+    qint32 ViewAccBalance(QString);
+    QString GetAccNum(QString);
     bool TransferAmount(QString,quint32);
 	QString GetField(QString accountNumber, QString jsonField);
     bool UpdateField(QString,QString,QString);
     bool MakeTransaction(qint32);
     void SaveTransaction(QString,QString&);
     QString ViewTransactionHistory(QString,quint16);
-    bool checkAccNo(QString);
-    bool checkField(QString ,QString);
+    bool CheckAccNum(QString);
+    bool CheckField(QString ,QString);
     bool UpdateUser(QString ,QVariantMap);
     bool CreateUser(QString,QString,QVariantMap);
-    bool checkUsername(QString);
+    bool CheckUserName(QString);
     bool DeleteUser(QString);
     QString ViewBankDataBase();
 
@@ -39,13 +39,12 @@ public:
 
 signals:
 private:
-    QFile Login_DB;
-    QFile Users_DB;
-    QString m_accountnumber;
-    QString m_username;
-    QString m_role;
-    QJsonObject m_login;
-    //QJsonObject userObject;
+    QFile database;
+    QFile login_data;
+    QString AccNum;
+    QString UserName;
+    QString _role;
+    QJsonObject JsonObj;
 
 };
 

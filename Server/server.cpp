@@ -38,12 +38,9 @@ void Server::disconnected()
 
 void Server::readyRead()
 {
-    //create pointer to the socket connected to the object send the request
     QTcpSocket* socket=qobject_cast<QTcpSocket*>(sender());
-    //create an in datasream to take the needed data from the client
     QDataStream inStream(socket);
     inStream.setVersion(QDataStream::Qt_6_6);
-    //take the request message and the role of our client to be able to handle the request
     QString request,role,requestflag;
     inStream>>requestflag;
     if(requestflag=="CreateUser")
@@ -61,22 +58,17 @@ void Server::readyRead()
     inStream>>request>>role;
     qDebug()<<request<<role;
     }
-    //call this method to handle the request according to client role
     setRole(role);
     Handlerequest(request,role);
 }
 
 void Server::Handlerequest(QString request,QString role)
 {
-    //create pointer to the socket connected to the object send the request
     QTcpSocket* socket=qobject_cast<QTcpSocket*>(sender());
-    //create an in datasream to take the needed data from the client
     QDataStream inStream(socket);
-    //create an out datastream to send the respond to the client
     QDataStream outStream(socket);
     inStream.setVersion(QDataStream::Qt_6_6);
     outStream.setVersion(QDataStream::Qt_6_6);
-    //check if oour client is user or admin to handle his request
     if(role.toUpper()=="USER")
     {
     if(request=="Transfer Account")
@@ -87,21 +79,18 @@ void Server::Handlerequest(QString request,QString role)
         inStream >> totransferaccount >> transferamount;
         qDebug() << "Received from client:"<<totransferaccount<<" "<<transferamount ;
         ok=TransferAmount(totransferaccount,transferamount);
-        //sending respond to the server using the socket
         outStream<<ok;
 
     }
     else if(request=="View Account")
     {
         QString m_accountnumber=accountnumber();
-        qint32 Balance =ViewAccountBalance(m_accountnumber);
-         //sending respond to the server using the socket
+        qint32 Balance =ViewAccBalance(m_accountnumber);
         outStream<<Balance;
     }
     else if(request=="Make Transaction")
     {
          bool ok = true;
-        //quint16 TransactionNumber=0;
         qint32 TransactionAmount=0;
         inStream >> TransactionAmount;
         ok=MakeTransaction(TransactionAmount);
@@ -113,16 +102,15 @@ void Server::Handlerequest(QString request,QString role)
         bool ok;
         inStream>>username>>password;
         qDebug() << "Received from client:" << username<<" "<<password ;
-        ok=checkLogin(username,password);
-         //sending respond to the server using the socket
+        ok=CheckLogin(username,password);
          outStream<<ok;
 
     }
-    else if(request=="GetAccNo")
+    else if(request=="GetAccNum")
     {
         QString username,accountnumber;
         inStream>>username;
-        accountnumber = GetAccNo(username);
+        accountnumber = GetAccNum(username);
         outStream<<accountnumber;
 
     }
@@ -143,8 +131,7 @@ void Server::Handlerequest(QString request,QString role)
             bool ok;
             inStream>>username>>password;
             qDebug() << "Received from client:" << username<<" "<<password ;
-            ok=checkLogin(username,password);
-            //sending respond to the server using the socket
+            ok=CheckLogin(username,password);
             outStream<<ok;
 
         }
@@ -152,15 +139,14 @@ void Server::Handlerequest(QString request,QString role)
         {
             QString accountnumber;
             inStream >>accountnumber;
-            qint32 Balance =ViewAccountBalance(accountnumber);
-             //sending respond to the server using the socket
+            qint32 Balance =ViewAccBalance(accountnumber);
             outStream<<Balance;
         }
-        else if(request=="GetAccNo")
+        else if(request=="GetAccNum")
         {
             QString username,accountnumber;
             inStream>>username;
-            accountnumber = GetAccNo(username);
+            accountnumber = GetAccNum(username);
             outStream<<accountnumber;
 
         }
@@ -173,7 +159,7 @@ void Server::Handlerequest(QString request,QString role)
              QString accountnumber;
              inStream>>accountnumber;
              qInfo()<<accountnumber;
-             bool ok=checkAccNo(accountnumber);
+             bool ok=CheckAccNum(accountnumber);
              outStream<<ok;
 
             }
@@ -196,7 +182,7 @@ void Server::Handlerequest(QString request,QString role)
             {
                  QString username;
                 inStream>>username;
-                bool ok=checkUsername(username);
+                bool ok=CheckUserName(username);
                 outStream<<ok;
 
             }
