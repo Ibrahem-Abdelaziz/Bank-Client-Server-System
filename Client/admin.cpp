@@ -1,504 +1,443 @@
 #include "admin.h"
+#include <iostream>
 #include <QVariant>
 #include <QVariantMap>
-#include <QMap>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QTextStream>
-Admin::Admin()
-{
-    oStream.setDevice(&_socket);
-    oStream.setVersion(QDataStream::Qt_6_6);
-    iStream.setDevice(&_socket);
-    iStream.setVersion(QDataStream::Qt_6_6);
-    _role = "admin";
-    connect(&_socket,&QTcpSocket::connected,this,&Admin::connected);
-    connect(&_socket,&QTcpSocket::disconnected,this,&Admin::disconnected);
-    connect(&_socket,&QTcpSocket::stateChanged,this,&Admin::stateChanged);
-    connect(&_socket,&QTcpSocket::readyRead,this,&Admin::readyRead);
-    connect(&_socket,&QTcpSocket::errorOccurred,this,&Admin::error);
+#include <conio.h>
 
+AdminManager::AdminManager() : Client()
+{
+    outStream.setDevice(&socket);
+    outStream.setVersion(QDataStream::Qt_6_6);
+    inStream.setDevice(&socket);
+    inStream.setVersion(QDataStream::Qt_6_6);
+    role = "admin";
+    connect(&socket, &QTcpSocket::connected, this, &AdminManager::connected);
+    connect(&socket, &QTcpSocket::disconnected, this, &AdminManager::disconnected);
+    connect(&socket, &QTcpSocket::stateChanged, this, &AdminManager::stateChanged);
+    connect(&socket, &QTcpSocket::readyRead, this, &AdminManager::readyRead);
+    connect(&socket, &QTcpSocket::errorOccurred, this, &AdminManager::error);
 }
 
-void Admin::ViewAccBalance()
+void AdminManager::viewAccount()
 {
-    QTextStream inStream(stdin);
-    QTextStream outStream(stdout);
+    std::string accountNumber;
+    QString accountNumberStr;
 
-    // Get account number from the user
-    outStream << "Please send the account number:" << Qt:: endl;
-    QString accountNumber = inStream.readLine();
-
-    // Send the account number to the server
-    outStream << accountNumber;
-    _socket.waitForBytesWritten();
-
-    // Wait for the response from the server
-    _socket.waitForReadyRead();
-
-    // Read the server response and display it to the client
-    qDebug() << "Your account balance is: " << _serverresponse.toInt();
-
+    clearScreen();
+    qInfo() << "Please Enter the account number";
+    std::cin >> accountNumber;
+    accountNumberStr = QString::fromStdString(accountNumber);
+    outStream << accountNumberStr;
+    socket.waitForBytesWritten();
+    socket.waitForReadyRead();
+    qInfo() << "Admin account balance is: " << serverResponse.toInt();
 }
 
-void Admin::GetAccNum()
+void AdminManager::getAccountNumber()
 {
-    QTextStream inStream(stdin);
-    QTextStream outStream(stdout);
-
-    outStream << "Please Enter the username:" << Qt::endl;
-    QString username;
-    inStream >> username;
-
-    outStream << username;
-    _socket.waitForBytesWritten();
-
-    // Wait for the response from the server
-    _socket.waitForReadyRead();
-
-    qDebug() << "Account Number is: " << _serverresponse.toString();
+    qInfo() << "Please Enter the username:";
+    std::string username;
+    std::cin >> username;
+    QString userName = QString::fromStdString(username);
+    outStream << userName;
+    socket.waitForBytesWritten();
+    socket.waitForReadyRead();
+    qInfo() << "Account Number is: " << serverResponse.toString();
 }
 
-void Admin::ViewDatabase()
+void AdminManager::viewBankDatabase()
 {
-    _socket.waitForReadyRead();
-    qDebug()<<_serverresponse.toString();
+    socket.waitForReadyRead();
+    qInfo().noquote() << serverResponse.toString();
 }
 
-void Admin::CreatNewUser()
+void AdminManager::createNewUser()
 {
-    QVariantMap userMap;
-    QString username, password, fullName;
+    QVariantMap map;
+    std::string username, password;
+    QString userName, fullName, flag = "check";
     quint32 age = 0;
+    quint16 counter = 0;
     qint32 balance = 0;
-    qint16 counter = 0 ;
-    QTextStream inStream(stdin);
     bool ok = false;
-    reqflag = "CreateUser";
-    QString flag = "check";
+    QTextStream cin(stdin);
+    requestFlag = "CreateUser";
 
     do
     {
         if (counter > 0)
         {
-            qDebug() << "User name is already existed,Enter a another name:";
+            qInfo() << "User name is already existed!!\nPlease Enter a different one:";
+            std::cin >> username;
+            userName = QString::fromStdString(username);
+            outStream << requestFlag << flag << userName;
         }
         else
         {
-            qDebug() << "Username:";
+            qInfo() << "Username:";
+            std::cin >> username;
+            userName = QString::fromStdString(username);
+            outStream << flag << userName;
         }
 
-        inStream >> username;
-
-        oStream << reqflag << flag << username;
         counter++;
-
-        _socket.waitForReadyRead();
-        ok = _serverresponse.toBool();
-
+        socket.waitForReadyRead();
+        ok = serverResponse.toBool();
     } while (!ok);
 
     flag = "update";
 
-    qDebug() << "Full Name:";
-    fullName = inStream.readLine();
+    qInfo() << "Full Name:";
+    fullName = cin.readLine();
 
-    qDebug() << "Age:";
-    inStream >> age;
+    qInfo() << "Age:";
+    std::cin >> age;
 
-    qDebug() << "Balance:";
-    inStream >> balance;
+    qInfo() << "Balance:";
+    std::cin >> balance;
 
-    qDebug() << "Password:";
-    inStream >> password;
+    qInfo() << "Password:";
+    std::cin >> password;
 
-    userMap["Fullname"] = fullName;
-    userMap["Age"] = age;
-    userMap["Balance"] = balance;
-    userMap["Username"] = username;
+    map["Fullname"] = fullName;
+    map["Age"] = age;
+    map["Balance"] = balance;
+    map["Username"] = userName;
 
-    SendUserCreationRequest(username, password, userMap);
-}
+    QString passwordStr = QString::fromStdString(password);
+    outStream << requestFlag << flag << userName << passwordStr << map;
+    socket.waitForBytesWritten();
+    socket.waitForReadyRead();
+    requestFlag = "General";
 
-void Admin::SendUserCreationRequest(const QString& username, const QString& password, const QVariantMap& userMap)
-{
-    QString flag = "update";
-    QString Password = password;
-
-    oStream << reqflag << flag << username << Password << userMap;
-    _socket.waitForBytesWritten();
-    _socket.waitForReadyRead();
-    reqflag = "General";
-
-    if (_serverresponse.toBool())
+    if (serverResponse.toBool() == true)
     {
-        qDebug() << "User is created";
+        qInfo() << "User is created Successfully";
     }
     else
     {
-        qDebug() << "User is not created";
+        qInfo() << "User is not created!!";
     }
 }
 
-void Admin::DeleteUser()
+void AdminManager::deleteUser()
 {
-    qDebug() << "Please send the account number:";
-    QString accountNumber;
-    iStream >> accountNumber;
-    oStream << accountNumber;
-    _socket.waitForBytesWritten();
-
-    // Wait for the response from the server to view it on the client
-    _socket.waitForReadyRead();
-
-    if (_serverresponse.toBool())
+    qInfo() << "Please send the account number:";
+    std::string accountNumber;
+    std::cin >> accountNumber;
+    QString accountNumberStr = QString::fromStdString(accountNumber);
+    outStream << accountNumberStr;
+    socket.waitForBytesWritten();
+    socket.waitForReadyRead();
+    if (serverResponse.toBool() == true)
     {
-        qDebug() << "User is deleted";
+        qInfo() << "User is deleted";
     }
     else
     {
-        qDebug() << "User is not deleted!!";
+        qInfo() << "User is not deleted!!\nAccount number is not existed!!";
     }
-
 }
 
-void Admin::UpdateUser()
+void AdminManager::updateUser()
 {
+    QTextStream cin(stdin);
+    QString flag = "check";
+    QString fullName;
     QVariantMap map;
-    QString accountNumber, fullname, password;
-    quint8 age = 0;
-    quint8 in = 0;
-    char key = 'y';
-    quint8 counter = 0;
+    QString accountNumberStr;
+    std::string accountNumber, password;
+    quint16 age = 0;
+    quint16 in = 0;
+    std::string key;
+    bool chosenFlag = true;
     qint32 balance = 0;
+    quint16 counter = 0;
     bool ok = false;
+    requestFlag = "UpdateUser";
 
     do
     {
         if (counter > 0)
         {
-            qDebug() << "Account Number is not existed!!\nPlease Enter a valid one:";
-            iStream >> accountNumber;
-            oStream << accountNumber;
+            qInfo() << "Account Number is not existed!!\nplease Enter a valid one:";
+            std::cin >> accountNumber;
+            accountNumberStr = QString::fromStdString(accountNumber);
+            outStream << requestFlag << flag << accountNumberStr;
         }
         else
         {
-            qDebug() << "Account Number:";
-            iStream >> accountNumber;
-            oStream << accountNumber;
+            qInfo() << "Account Number:";
+            std::cin >> accountNumber;
+            accountNumberStr = QString::fromStdString(accountNumber);
+            outStream << flag << accountNumberStr;
         }
         counter++;
-        _socket.waitForReadyRead();
-        ok = _serverresponse.toBool();
+        socket.waitForReadyRead();
+        ok = serverResponse.toBool();
     } while (!ok);
+
+    flag = "update";
 
     do
     {
-        qDebug() << "Choose the field you want to update:";
-        qDebug() << "1-Full Name\n2-Age\n3-Balance\n4-Password";
-        iStream >> in;
-
+        qInfo() << "Choose the field you want to update:";
+        qInfo() << "1-Full Name\n2-Age\n3-Balance\n4-Password";
+        std::cin >> in;
         switch (in)
         {
         case 1:
-            qDebug() << "New Full Name:";
-            iStream >> fullname;
-            map["Full Name"] = fullname;
+            qInfo() << "New Full Name:";
+            fullName = cin.readLine();
+            map["Fullname"] = fullName;
+            qInfo() << fullName;
             break;
         case 2:
-            qDebug() << "New Age:";
-            iStream >> age;
+            qInfo() << "New Age:";
+            std::cin >> age;
             map["Age"] = age;
             break;
         case 3:
-            qDebug() << "New Balance:";
-            iStream >> balance;
+            qInfo() << "New Balance:";
+            std::cin >> balance;
             map["Balance"] = balance;
             break;
         case 4:
-            qDebug() << "New Password:";
-            iStream >> password;
-            map["Password"] = password;
+            qInfo() << "New Password:";
+            std::cin >> password;
+            map["password"] = QString::fromStdString(password);
             break;
         default:
-            qDebug() << "Please enter a valid choice";
+            qInfo() << "Please enter a valid choice";
             break;
         }
+        qInfo() << "----------------------------------------------------------";
+        qInfo() << "If you want to update another field press 'y'\nIf you want to save and exit press'n'";
+        std::cin >> key;
+        if (key != "y")
+        {
+            chosenFlag = false;
+        }
+    } while (chosenFlag);
 
-        qDebug() << "----------------------------------------------------------";
-        qDebug() << "If you want to update another field press 'y'\nIf you want to save and exit press 'n'";
-        iStream >> key;
-    } while (key != 'n' && key != 'N');
+    outStream << requestFlag << flag << accountNumberStr << map;
+    socket.waitForBytesWritten();
+    socket.waitForReadyRead();
+    requestFlag = "General";
 
-    oStream << map;
-    _socket.waitForBytesWritten();
-    _socket.waitForReadyRead();
-
-    if (_serverresponse.toBool())
+    if (serverResponse.toBool() == true)
     {
-        qDebug() << "User Data is updated Successfully";
+        qInfo() << "User Data is updated Successfully";
     }
     else
     {
-        qDebug() << "User Data is not updated!!";
-    }
-
-}
-
-void Admin::connectToHost(QString host, quint32 port)
-{
-    if(_socket.isOpen()) disconnect();
-    _socket.connectToHost(host,port);
-}
-
-void Admin::disconnect()
-{
-    _socket.close();
-    _socket.disconnectFromHost();
-    _socket.waitForDisconnected();
-}
-
-void Admin::ViewTransHistory()
-{
-    QTextStream inStream(stdin);
-    QTextStream outStream(stdout);
-
-    // Get account number from the user
-    outStream << "Please send the account number:" << Qt::endl;
-    QString AccountNumber = inStream.readLine();
-    // Get the number of transactions from the user
-    outStream << "Please send the number of transactions:" << Qt::endl;
-    quint32 count = inStream.readLine().toUInt();
-
-    // Send the data to the server to handle that
-    outStream << AccountNumber << count;
-    _socket.waitForBytesWritten();
-
-    // Wait for the response from the server to view it on the client
-    _socket.waitForReadyRead();
-
-    // Assuming m_serverrespond is a QVariant containing the transaction history
-    QVariant transactionHistory = _serverresponse;
-
-    // Print the transaction history
-    qDebug() << transactionHistory;
-}
-
-void Admin::SendReqToServer()
-{
-    oStream<<_request<<_role;
-
-    if(_request=="View Bank DataBase")
-    {
-        //call the method View Bank DataBase to handle this request
-        ViewDatabase();
-    }
-    else if(_request=="View Account")
-    {
-        //call the method view Account to handle this request
-        ViewAccBalance();
-    }
-    else if(_request=="Create New User")
-    {
-        CreatNewUser();
-    }
-    else if(_request=="Get Acc No")
-    {
-        GetAccNum();
-    }
-    else if(_request=="View Transaction History")
-    {
-        ViewTransHistory();
-    }
-    else if(_request=="Update User")
-    {
-        UpdateUser();
-    }
-    else if(_request=="Delete User")
-    {
-        DeleteUser();
-    }
-    else
-    {
-        qFatal("The request message is not defined");
+        qInfo() << "User Data is not updated!!";
     }
 }
 
-bool Admin::Login()
+void AdminManager::viewTransactionHistory()
 {
-    QTextStream inStream(stdin);
-    QTextStream outStream(stdout);
+    qInfo() << "Please send the account number:";
+    std::string accountNumber;
+    std::cin >> accountNumber;
+    QString accountNumberStr = QString::fromStdString(accountNumber);
+    qInfo() << "Please send the number of transactions:";
+    quint16 count;
+    std::cin >> count;
+    outStream << accountNumberStr << count;
+    socket.waitForBytesWritten();
+    socket.waitForReadyRead();
+    qInfo().noquote() << serverResponse.toString();
+}
 
-    qDebug() << "WELCOME"<<Qt::endl;
-    qDebug() << "Username: "<<Qt::endl;
-    _request="Login";
+void AdminManager::sendRequestToServer()
+{
+    outStream << requestFlag << request << role;
+}
 
+bool AdminManager::login()
+{
+    qInfo() << "WELCOME!!";
+    qInfo() << "Username: ";
+    request = "Login";
+    outStream << requestFlag << request << role;
     QString adminName, password;
+    std::string name;
+    std::cin >> name;
+    adminName = QString::fromStdString(name);
+    qInfo() << "Password: ";
 
-    inStream >> adminName;
-    _admin = adminName;
 
-    qDebug() << "Password: "<<Qt::endl;
+    char ch;
+    std::string pass;
 
-    inStream >> password;
+    while (true)
+    {
+        ch = _getch();
+
+        if (ch == 13)
+            break;
+
+        std::cout << '*';
+        pass += ch;
+    }
+
+    std::cout<< std::endl;
+    password = QString::fromStdString(pass);
+
+
 
     bool ok = false;
     quint8 count = 0;
-
     while (count < 3)
     {
         count++;
-
         if (!adminName.isEmpty() && !password.isEmpty())
         {
             outStream << adminName << password;
-            _socket.waitForBytesWritten();
-            _socket.waitForReadyRead();
-            ok = _serverresponse.toBool();
+            socket.waitForBytesWritten();
+            socket.waitForReadyRead();
+            ok = serverResponse.toBool();
+            this->adminName = adminName;
             break;
         }
     }
-
-    StartNew();
+    clearScreen();
     return ok;
 }
 
-void Admin::Start(bool &isLogged)
+void AdminManager::start(bool &isLogged)
 {
     quint16 input;
     char in;
+    qInfo() << "Choose from the list:\n1-View Account\n2-View Transaction History\n3-Get Account Number\n4-Create New User"
+               "\n5-Update User Data\n6-Delete User\n7-View Bank DataBase\n8-exit";
+    std::cin >> input;
 
-    qDebug() << "Choose from the list:";
-    qDebug() << "1- View Account";
-    qDebug() << "2- View Transaction History";
-    qDebug() << "3- Get Account Number";
-    qDebug() << "4- Create New User";
-    qDebug() << "5- Update User Data";
-    qDebug() << "6- Delete User";
-    qDebug() << "7- View Bank DataBase";
-    qDebug() << "8- Exit";
-
-    QTextStream inStream(stdin);
-    inStream >> input;
-
-    StartNew();
-
-    switch(input)
+    std::cin.ignore();
+    clearScreen();
+    switch (input)
     {
     case 1:
-        _request = "View Account";
-        SendReqToServer();
+        request = "View Account";
+        sendRequestToServer();
+        viewAccount();
         break;
     case 2:
-        _request = "View Transaction History";
-        SendReqToServer();
+        request = "View Transaction History";
+        sendRequestToServer();
+        viewTransactionHistory();
         break;
     case 3:
-        _request = "Get Account Number";
-        SendReqToServer();
+        request = "GetAccNo";
+        sendRequestToServer();
+        getAccountNumber();
         break;
     case 4:
-        _request = "Create New User";
-        SendReqToServer();
+        request = "Create User";
+        sendRequestToServer();
+        createNewUser();
         break;
     case 5:
-        _request = "Update User Data";
-        SendReqToServer();
+        request = "Update User";
+        sendRequestToServer();
+        updateUser();
         break;
     case 6:
-        _request = "Delete User";
-        SendReqToServer();
+        request = "Delete User";
+        sendRequestToServer();
+        deleteUser();
         break;
     case 7:
-        _request = "View Bank DataBase";
-        SendReqToServer();
+        request = "View Bank DataBase";
+        sendRequestToServer();
+        viewBankDatabase();
         break;
     case 8:
         isLogged = false;
         break;
     default:
-        qDebug() << "Your choice is invalid";
+        qInfo() << "Your choice is invalid";
         break;
     }
-
     if (input != 8)
     {
-        SendReqToServer();
-        qDebug() << "If you have another request, press 'y'; if you want to exit, press 'N':";
-        inStream >> in;
-
+        qInfo() << "if you have another request press 'y' if you want to exit press 'N':";
+        std::cin >> in;
         if (in == 'n' || in == 'N')
         {
             isLogged = false;
         }
-
-        qDebug() << "----------------------------------------------------------------------------";
+        clearScreen();
     }
 }
 
-void Admin::connected()
+void AdminManager::connectToHost(QString host, quint16 port)
+{
+    if (socket.isOpen())
+        disconnect();
+    socket.connectToHost(host, port);
+}
+
+void AdminManager::disconnect()
+{
+    socket.close();
+    socket.waitForDisconnected();
+}
+
+void AdminManager::connected()
 {
     QTextStream input(stdin, QIODevice::ReadOnly);
     QString userInput = input.readLine().trimmed();
-    _socket.write(userInput.toUtf8());
+    socket.write(userInput.toUtf8());
 }
 
-void Admin::disconnected()
+void AdminManager::disconnected()
 {
-    _socket.close();
-    _socket.waitForDisconnected();
-    qDebug() << "Disconnected";
+    qInfo() << "Disconnected";
 }
 
-void Admin::error(QAbstractSocket::SocketError socketerror)
+void AdminManager::error(QAbstractSocket::SocketError socketError)
 {
-    qDebug()<<"Error:"<<socketerror<<_socket.errorString();
+    qInfo() << "Error:" << socketError << socket.errorString();
 }
 
-void Admin::stateChanged(QAbstractSocket::SocketState socketstate)
+void AdminManager::stateChanged(QAbstractSocket::SocketState socketState)
 {
-    QMetaEnum metaenum = QMetaEnum::fromType<QAbstractSocket::SocketState>();
-    QString str= metaenum.valueToKey(socketstate);
+    QMetaEnum metaEnum = QMetaEnum::fromType<QAbstractSocket::SocketState>();
+    QString str = metaEnum.valueToKey(socketState);
 }
 
-void Admin::readyRead()
+void AdminManager::readyRead()
 {
-
-    if(_request=="View Bank DataBase")
+    if (request == "View Bank DataBase")
     {
-        QString Database;
-        iStream>>Database;
-        _serverresponse.setValue(Database);
-
+        QString database;
+        inStream >> database;
+        serverResponse.setValue(database);
     }
-    else if(_request=="View Account")
+    else if (request == "View Account")
     {
-        quint32 AccountMoney;
-        //take the money in the account from the server and save it in the server respond
-        iStream>>AccountMoney;
-        _serverresponse.setValue(AccountMoney);
+        quint32 accountMoney;
+        inStream >> accountMoney;
+        serverResponse.setValue(accountMoney);
     }
-    else if(_request=="Create New User"||(_request=="Delete User")||(_request=="Update User Data")||(_request=="Login"))
+    else if (request == "Create User" || (request == "Delete User") || (request == "Update User") || (request == "Login"))
     {
         bool respond;
-        iStream>>respond;
-        _serverresponse.setValue(respond);
-
+        inStream >> respond;
+        serverResponse.setValue(respond);
     }
-    else if(_request=="Get Account Number")
+    else if (request == "GetAccNo")
     {
-        QString AccNo;
-        iStream>>AccNo;
-        _serverresponse.setValue(AccNo);
+        QString accNo;
+        inStream >> accNo;
+        serverResponse.setValue(accNo);
     }
-    else if(_request=="View Transaction History")
+    else if (request == "View Transaction History")
     {
-        QString History;
-        iStream>>History;
-        _serverresponse.setValue(History);
+        QString history;
+        inStream >> history;
+        serverResponse.setValue(history);
     }
-
 }
-
-
-

@@ -3,36 +3,38 @@
 
 #include "client.h"
 
-class User : public Client
+class UserManager : public Client
 {
 public:
-    explicit User();
-    void GetAccNum() ;
-    void ViewAccBalance();
-    void ViewTransHistory();
-    void SendReqToServer();
-    bool Login ();
-    void TransAcc();
-    void MakeTransaction();
-    // quint8 UserOption();
-    void Start(bool&);
+    explicit UserManager();
+    void transferAccount();
+    void makeTransaction();
+    void viewAccount();
+    void getAccountNumber();
+    void viewTransactionHistory();
+    void sendRequestToServer();
+    bool login();
+    quint8 userOptions();
+    void start(bool &isLogged);
+
 signals:
 public slots:
-    void connectToHost(QString host , quint16 port );
+    void connectToHost(QString host, quint16 port);
     void disconnect();
+
 protected slots:
     void connected();
     void disconnected();
-    void error (QAbstractSocket::SocketError socketerror);
-    void stateChanged(QAbstractSocket::SocketState socketstate);
+    void error(QAbstractSocket::SocketError socketError);
+    void stateChanged(QAbstractSocket::SocketState socketState);
     void readyRead();
-private:
-    QTcpSocket _socket;
-    QDataStream oStream;
-    QDataStream iStream;
-    QString _userName;
-    QString _accNumber;
 
+private:
+    QTcpSocket socket;
+    QDataStream outStream;
+    QDataStream inStream;
+    QString userName;
+    QString accountNumber;
 };
 
 #endif // USER_H

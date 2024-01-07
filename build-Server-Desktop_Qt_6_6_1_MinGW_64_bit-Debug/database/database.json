@@ -1,0 +1,43 @@
+{
+    "1990": {
+        "Accountnumber": "1990",
+        "Age": "33",
+        "Balance": "1000500",
+        "Fullname": "Ahmed Abdelaziz Ibrahem",
+        "Transaction History": [
+            {
+                "datetime": "2024-01-07 15:04:56",
+                "details": "500 from 1998"
+            }
+        ],
+        "Username": "Ahmed"
+    },
+    "1998": {
+        "Accountnumber": "1998",
+        "Age": "25",
+        "Balance": "2000500",
+        "Fullname": "Ibrahem Abdelaziz Ibrahem",
+        "Transaction History": [
+            {
+                "datetime": "2024-01-07 20:10:53",
+                "details": "+500"
+            },
+            {
+                "datetime": "2024-01-07 15:04:56",
+                "details": "500 to 1990"
+            },
+            {
+                "datetime": "2024-01-04 15:06:56",
+                "details": "+500"
+            }
+        ],
+        "Username": "Ibrahem"
+    },
+    "9998": {
+        "Accountnumber": "9998",
+        "Age": "25",
+        "Balance": "100000",
+        "Fullname": "Mohamed Adel",
+        "Username": "Adel"
+    }
+}

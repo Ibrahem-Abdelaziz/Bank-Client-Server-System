@@ -2,69 +2,68 @@
 #include <QDebug>
 #include "user.h"
 #include "admin.h"
-#include <QTextStream>
-#include <QCoreApplication>
 #include <iostream>
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    QTextStream outStream(stdout);
-    QTextStream inStream(stdin);
-
     QString role;
+    bool isLogged = false;
 
-    qDebug() << "Welcome to the bank system\ncan you choose your role  \"user\", \"admin\", or you can exit: ";
-    QString clientRole;
-    inStream >> clientRole;
-    role = clientRole.toStdString().c_str();
+    qInfo() << "Welcome to the bank system\nPlease choose\"user\" or \"admin\" or \"exit\"";
+    std::string clientRole;
+    std::cin >> clientRole;
+    role = QString::fromStdString(clientRole);
 
-    bool isLogged =false;
     if (role.toUpper() == "USER")
     {
-        User user;
+        UserManager user;
         user.connectToHost("127.0.0.1", 1234);
+
         while (!isLogged)
         {
-            isLogged = user.Login();
-            user.StartNew();
-            if(!isLogged)
+            isLogged = user.login();
+            user.clearScreen();
+
+            if (!isLogged)
                 qInfo("Username or Password is wrong!!\nPlease Try Again");
         }
 
-        while(isLogged)
+        while (isLogged)
         {
-            user.Start(isLogged);
+            user.start(isLogged);
         }
     }
     else if (role.toUpper() == "ADMIN")
     {
-        Admin admin;
+        AdminManager admin;
         admin.connectToHost("127.0.0.1", 1234);
+
         while (!isLogged)
         {
-            isLogged = admin.Login();
-            admin.StartNew();
-            if(!isLogged)
+            isLogged = admin.login();
+            admin.clearScreen();
+
+            if (!isLogged)
                 qInfo("Username or Password is wrong!!\nPlease Try Again");
         }
 
-        while(isLogged)
+        while (isLogged)
         {
-            admin.Start(isLogged);
+            admin.start(isLogged);
         }
     }
     else if (role.toUpper() == "EXIT")
     {
-        outStream << "Thank you for using our Bank ... See you soon" <<Qt:: endl;
-        return a.exec();
+        qInfo() << "Thank you!....System is closing..";
+        QCoreApplication::exit(0);
     }
     else
     {
-        outStream << "Sorry, you've entered invalid input" <<Qt:: endl;
+        qInfo() << "Sorry, you're entering an invalid input";
     }
 
-    outStream << "Thank you for using our Bank ... See you soon " << Qt::endl;
-
+    qInfo() << "Thank you for using or banking system ...see you soon ";
+    QCoreApplication::exit(0);
     return a.exec();
 }

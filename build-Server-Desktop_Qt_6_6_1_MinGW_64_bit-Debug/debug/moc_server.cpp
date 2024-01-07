@@ -6,7 +6,7 @@
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../Server/server.h"
+#include "../../server/server.h"
 #include <QtCore/qmetatype.h>
 
 #if __has_include(<QtCore/qtmochelpers.h>)
@@ -112,7 +112,7 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSServerENDCLASS[] = {
 };
 
 Q_CONSTINIT const QMetaObject Server::staticMetaObject = { {
-    QMetaObject::SuperData::link<QObject::staticMetaObject>(),
+    QMetaObject::SuperData::link<DataBase::staticMetaObject>(),
     qt_meta_stringdata_CLASSServerENDCLASS.offsetsAndSizes,
     qt_meta_data_CLASSServerENDCLASS,
     qt_static_metacall,
@@ -161,12 +161,12 @@ void *Server::qt_metacast(const char *_clname)
     if (!_clname) return nullptr;
     if (!strcmp(_clname, qt_meta_stringdata_CLASSServerENDCLASS.stringdata0))
         return static_cast<void*>(this);
-    return QObject::qt_metacast(_clname);
+    return DataBase::qt_metacast(_clname);
 }
 
 int Server::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
-    _id = QObject::qt_metacall(_c, _id, _a);
+    _id = DataBase::qt_metacall(_c, _id, _a);
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {

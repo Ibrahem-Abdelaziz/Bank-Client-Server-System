@@ -1,338 +1,241 @@
 #include "user.h"
 #include <iostream>
-#include<QDataStream>
-#include<QDebug>
+#include <QVariant>
+#include <conio.h>
 
-User::User()
+UserManager::UserManager() : Client()
 {
-    oStream.setDevice(&_socket);
-    oStream.setVersion(QDataStream::Qt_6_6);
-    iStream.setDevice(&_socket);
-    iStream.setVersion(QDataStream::Qt_6_6);
-    _role = "user";
-    _request="Login";
-    reqflag="General";
-    connect(&_socket,&QTcpSocket::connected,this,&User::connected);
-    connect(&_socket,&QTcpSocket::disconnected,this,&User::disconnected);
-    connect(&_socket,&QTcpSocket::stateChanged,this,&User::stateChanged);
-    connect(&_socket,&QTcpSocket::readyRead,this,&User::readyRead);
-    connect(&_socket,&QTcpSocket::errorOccurred,this,&User::error);
+    outStream.setDevice(&socket);
+    outStream.setVersion(QDataStream::Qt_6_6);
+    inStream.setDevice(&socket);
+    inStream.setVersion(QDataStream::Qt_6_6);
+    role = "user";
+    request = "Login";
+    requestFlag = "General";
+    connect(&socket, &QTcpSocket::connected, this, &UserManager::connected);
+    connect(&socket, &QTcpSocket::disconnected, this, &UserManager::disconnected);
+    connect(&socket, &QTcpSocket::stateChanged, this, &UserManager::stateChanged);
+    connect(&socket, &QTcpSocket::readyRead, this, &UserManager::readyRead);
+    connect(&socket, &QTcpSocket::errorOccurred, this, &UserManager::error);
 }
 
-
-void User::TransAcc()
+void UserManager::transferAccount()
 {
-    QTextStream inStream(stdin);
-    QTextStream outStream(stdout);
-
-    outStream << "Please send the account number from which you will transfer:" << Qt::endl;
-    QString fromAccountNumber = inStream.readLine();
-
-    outStream << "Please send the account number to which you will transfer:" << Qt::endl;
-    QString toAccountNumber = inStream.readLine();
-
-    outStream << "Please send the transfer amount:" << Qt::endl;
-    quint32 transferAmount = inStream.readLine().toUInt();
-
-    // Send the data to the server to handle that
-    outStream << fromAccountNumber << toAccountNumber << transferAmount;
-    _socket.waitForBytesWritten();
-
-    // Wait for the response from the server to view it to the client
-    _socket.waitForReadyRead();
-    outStream << "Transaction is: " << _serverresponse.toBool() <<Qt:: endl;
-}
-void User:: MakeTransaction()
-{
-
-    QTextStream inStream(stdin);
-    QTextStream outStream(stdout);
-
-    // Get account number from the user
-    outStream << "Please send the account number:" << Qt::endl;
-    QString accountNumber = inStream.readLine();
-
-    // Get transaction amount from the user
-    outStream << "Please send the transaction amount:" << Qt::endl;
-    qint32 transactionAmount = inStream.readLine().toInt();
-
-    // Send the data to the server to handle that
-    outStream << accountNumber << transactionAmount;
-
-    // Wait for the response from the server to view it on the client
-    if (_socket.waitForReadyRead()) {
-        outStream << "Transaction is: " << _serverresponse.toBool() << Qt::endl;
-    } else {
-        qWarning() << "Error during socket communication.";
-    }
-
-}
-void User::ViewAccBalance()
-{
-
-    QTextStream inStream(stdin);
-    QTextStream outStream(stdout);
-
-    // Get account number from the user
-    outStream << "Please send the account number:" << Qt::endl;
-    QString accountNumber = inStream.readLine();
-
-    // Send the account number to the server
-    outStream << accountNumber;
-    _socket.waitForBytesWritten();
-
-    // Wait for the response from the server
-    _socket.waitForReadyRead();
-
-    // Read the server response and display it to the client
-    qDebug() << "Your account money is: " << _serverresponse.toInt();
+    qInfo() << "Please send the account number to which you will transfer:";
+    std::string toAccountNumber;
+    std::cin >> toAccountNumber;
+    qInfo() << "Please send the transfer amount:";
+    quint32 transferAmount;
+    std::cin >> transferAmount;
+    QString toAccountNumberStr = QString::fromStdString(toAccountNumber);
+    outStream << toAccountNumberStr << transferAmount;
+    socket.waitForBytesWritten();
+    socket.waitForReadyRead();
+    qInfo() << "Transaction is: " << serverResponse.toBool();
 }
 
-void User::GetAccNum()
+void UserManager::makeTransaction()
 {
-    _socket.waitForReadyRead();
-    qDebug()<<"Your account number is:"<<_serverresponse.toString();
+    qint32 transactionAmount = 0;
+    qInfo() << "Please send the transaction amount:";
+    std::cin >> transactionAmount;
+    outStream << transactionAmount;
+    socket.waitForReadyRead();
+    qInfo() << "Transaction is: " << serverResponse.toBool();
 }
 
-void User::ViewTransHistory()
+void UserManager::viewAccount()
 {
-    QTextStream inStream(stdin);
-    QTextStream outStream(stdout);
-
-    // Get account number from the user
-    outStream << "Please send the account number:" << Qt::endl;
-    QString AccountNumber = inStream.readLine();
-    // Get the number of transactions from the user
-    outStream << "Please send the number of transactions:" << Qt::endl;
-    quint32 count = inStream.readLine().toUInt();
-
-    // Send the data to the server to handle that
-    outStream << AccountNumber << count;
-    _socket.waitForBytesWritten();
-
-    // Wait for the response from the server to view it on the client
-    _socket.waitForReadyRead();
-
-    // Assuming m_serverrespond is a QVariant containing the transaction history
-    QVariant transactionHistory = _serverresponse;
-
-    // Print the transaction history
-    qDebug() << transactionHistory;
+    socket.waitForReadyRead();
+    qInfo() << "Your account money is: " << serverResponse.toInt();
 }
 
-void User::SendReqToServer()
+void UserManager::getAccountNumber()
 {
-    oStream<<_request<<_role;
-
-    if(_request=="Transfer Account")
-    {
-        //call the method Transfer Account to handle this request
-        TransAcc();
-    }
-    else if(_request=="View Account")
-    {
-        //call the method view Account to handle this request
-        ViewAccBalance();
-    }
-    else if(_request=="Make Transaction")
-    {
-        MakeTransaction();
-    }
-    else if(_request=="Get Acc No")
-    {
-        GetAccNum();
-    }
-    else if(_request=="View Transaction History")
-    {
-        ViewTransHistory();
-    }
-    else
-    {
-        qFatal("The request message is not defined");
-    }
+    outStream << userName;
+    socket.waitForReadyRead();
+    qInfo() << "Your account number is: " << serverResponse.toString();
 }
 
-bool User::Login()
+void UserManager::viewTransactionHistory()
 {
-    QTextStream inputStream(stdin);
-    QTextStream outputStream(stdout);
+    qInfo() << "Please send the number of transactions:";
+    quint16 count;
+    std::cin >> count;
+    outStream << count;
+    socket.waitForBytesWritten();
+    socket.waitForReadyRead();
+    qInfo().noquote() << serverResponse.toString();
+}
 
-    qDebug() << "WELCOME" << Qt::endl;
-    qDebug()<< "Username: "<< Qt::endl;;
-    _request = "Login";
+void UserManager::sendRequestToServer()
+{
+    outStream << requestFlag << request << role;
+}
 
-    QString userName;
+bool UserManager::login()
+{
+    qInfo() << "WELCOME!!";
+    qInfo() << "Username: ";
+    request = "Login";
+    outStream << requestFlag << request << role;
     QString password;
+    std::string name;
+    std::cin >> name;
+    userName = QString::fromStdString(name);
+    qInfo() << "Password: ";
 
-    inputStream >> userName;
+    char ch;
+    std::string pass;
 
-    _userName = userName;
+    while (true)
+    {
+        ch = _getch();
 
-    qDebug() << "Password: "<<Qt::endl;
+        if (ch == 13) // Enter key
+            break;
 
-    inputStream >> password;
+        std::cout << '*' ;
+        pass += ch;
+    }
+       std::cout<< std::endl;
 
+    password = QString::fromStdString(pass);
     bool ok = false;
     quint8 count = 0;
-
     while (count < 3)
     {
         count++;
-
         if (!userName.isEmpty() && !password.isEmpty())
         {
-            outputStream << userName << password;
-            bool written = _socket.waitForBytesWritten();
-            bool ready = _socket.waitForReadyRead();
-            ok = _serverresponse.toBool();
+            outStream << userName << password;
+            socket.waitForBytesWritten();
+            socket.waitForReadyRead();
+            ok = serverResponse.toBool();
             break;
         }
     }
-
-    StartNew();
-    // qDebug()<<"asdasd";
-    return true ;
+    clearScreen();
+    return ok;
 }
 
-void User::Start(bool& isLogged)
+void UserManager::start(bool &isLogged)
 {
-    quint16 input;
+    std::string stInput;
     char in;
-
-    qDebug() << "Choose from the list:";
-    qDebug() << "1- View Account";
-    qDebug() << "2- View Transaction History";
-    qDebug() << "3- Get Account Number";
-    qDebug() << "4- Transfer Account";
-    qDebug() << "5- Make Transaction";
-    qDebug() << "6- Exit";
-
-    QTextStream inStream(stdin);
-    inStream >> input;
-    inStream.flush(); // Flush the input buffer
-
-    StartNew();
-
-    switch(input)
+    qInfo() << "Choose from the list:\n1-View Account\n2-View Transaction History\n3-Get Account Number\n4-Transfer Account\n5-MakeTransaction\n6-exit";
+    std::cin >> stInput;
+    QString input = QString::fromStdString(stInput);
+    std::cin.ignore();
+    clearScreen();
+    switch (input.toUInt())
     {
     case 1:
-        _request = "View Account";
-        SendReqToServer();
-
+        request = "View Account";
+        sendRequestToServer();
+        viewAccount();
         break;
     case 2:
-        _request = "View Transaction History";
-        SendReqToServer();
-
+        request = "View Transaction History";
+        sendRequestToServer();
+        viewTransactionHistory();
         break;
     case 3:
-        _request = "Get Account Number";
-        SendReqToServer();
-
+        request = "GetAccNo";
+        sendRequestToServer();
+        getAccountNumber();
         break;
     case 4:
-        _request = "Transfer Account";
-        SendReqToServer();
-
+        request = "Transfer Account";
+        sendRequestToServer();
+        transferAccount();
         break;
     case 5:
-        _request = "Make Transaction";
-        SendReqToServer();
-
+        request = "Make Transaction";
+        sendRequestToServer();
+        makeTransaction();
         break;
     case 6:
         isLogged = false;
         break;
     default:
-        qDebug() << "Your choice is invalid";
+        qInfo() << "Your choice is invalid";
         break;
     }
-
-    if (input != 6)
+    if (input.toUInt() == 1 || input.toUInt() == 2 || input.toUInt() == 3 || input.toUInt() == 4 || input.toUInt() == 5)
     {
-        SendReqToServer();
-        qDebug() << "If you have another request, press 'y'; if you want to exit, press 'N':";
-        inStream >> in;
-
+        qInfo() << "if you have another request press 'y' if you want to exit press 'N':";
+        std::cin >> in;
         if (in == 'n' || in == 'N')
         {
             isLogged = false;
         }
-
-        qDebug() << "----------------------------------------------------------------------------";
+        clearScreen();
     }
-
 }
 
-
-
-
-void User::connectToHost(QString host, quint16 port)
+void UserManager::connectToHost(QString host, quint16 port)
 {
-    if(_socket.isOpen()) disconnect();
-    //qDebug()<<"connecting to host"<<host<<"on port:"<<port;
-    _socket.connectToHost(host,port);
+    if (socket.isOpen())
+        disconnect();
+    socket.connectToHost(host, port);
 }
 
-void User::disconnect()
+void UserManager::disconnect()
 {
-    _socket.close();
-    _socket.disconnectFromHost();
-    _socket.waitForDisconnected();
+    socket.close();
+    socket.disconnectFromHost();
+    socket.waitForDisconnected();
 }
 
-void User::connected()
+void UserManager::connected()
 {
     QTextStream input(stdin, QIODevice::ReadOnly);
     QString userInput = input.readLine().trimmed();
-    _socket.write(userInput.toUtf8());
+    socket.write(userInput.toUtf8());
 }
 
-void User::disconnected()
+void UserManager::disconnected()
 {
-    qDebug()<<"Thank you!...system is closing";
-    qDebug()<<"Disconnected";
+    qInfo() << "Thank you!...system is closing";
+    qInfo() << "Disconnected";
 }
 
-void User::error(QAbstractSocket::SocketError socketerror)
+void UserManager::error(QAbstractSocket::SocketError socketError)
 {
-    qDebug()<<"Error:"<<socketerror<<_socket.errorString();
+    qInfo() << "Error:" << socketError << socket.errorString();
 }
 
-void User::stateChanged(QAbstractSocket::SocketState socketstate)
+void UserManager::stateChanged(QAbstractSocket::SocketState socketState)
 {
-    QMetaEnum metaenum = QMetaEnum::fromType<QAbstractSocket::SocketState>();
-    QString str= metaenum.valueToKey(socketstate);
+    QMetaEnum metaEnum = QMetaEnum::fromType<QAbstractSocket::SocketState>();
+    QString str = metaEnum.valueToKey(socketState);
 }
 
-void User::readyRead()
+void UserManager::readyRead()
 {
-    if (_request=="View Account")
+    if (request == "View Account")
     {
-        quint32 AccountMoney;
-        //take the money in the account from the server and save it in the server respond
-        iStream>>AccountMoney;
-        _serverresponse.setValue(AccountMoney);
+        quint32 accountMoney;
+        inStream >> accountMoney;
+        serverResponse.setValue(accountMoney);
     }
-    else if(_request=="Transfer Account"||_request=="Make Transaction"||_request=="Login")
+    else if (request == "Transfer Account" || request == "Make Transaction" || request == "Login")
     {
         bool respond;
-        //know if the transaction succeed or not from the server and save it in the server respond
-        iStream>>respond;
-        _serverresponse.setValue(respond);
+        inStream >> respond;
+        serverResponse.setValue(respond);
     }
-    else if(_request=="Get Acc No")
+    else if (request == "GetAccNo")
     {
-        QString AccNo;
-        iStream>>AccNo;
-        _serverresponse.setValue(AccNo);
+        QString accNo;
+        inStream >> accNo;
+        serverResponse.setValue(accNo);
     }
-    else if(_request=="View Transaction History")
+    else if (request == "View Transaction History")
     {
-        QString History;
-        iStream>>History;
-        _serverresponse.setValue(History);
+        QString history;
+        inStream >> history;
+        serverResponse.setValue(history);
     }
 }
-
-

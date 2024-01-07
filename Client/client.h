@@ -1,5 +1,5 @@
-#ifndef CLIENT_H
-#define CLIENT_H
+#ifndef CLIENT_H_INCLUDED
+#define CLIENT_H_INCLUDED
 
 #include <QObject>
 #include <QTcpSocket>
@@ -11,21 +11,19 @@ class Client : public QObject
 {
     Q_OBJECT
 public:
-   explicit Client(QObject *parent = nullptr);
-    virtual void GetAccNum()=0;
-    virtual void ViewAccBalance()=0;
-    virtual void ViewTransHistory()=0;
-    virtual void SendReqToServer()=0;
-    virtual bool Login () = 0 ;
-    void StartNew();
+    explicit Client(QObject *parent = nullptr);
+    virtual void getAccountNumber() = 0;
+    virtual void viewAccount() = 0;
+    virtual void viewTransactionHistory() = 0;
+    virtual void sendRequestToServer() = 0;
+    virtual bool login() = 0;
+    void clearScreen();
 
- protected:
-    QString _role ;
-    QString _request;
-    QVariant _serverresponse;
-    QString reqflag;
-
-
+protected:
+    QString role;
+    QString request;
+    QVariant serverResponse;
+    QString requestFlag;
 };
 
-#endif // CLIENT_H
+#endif // CLIENT_H_INCLUDED
