@@ -288,20 +288,18 @@ bool AdminManager::login()
 
 
     bool ok = false;
-    quint8 count = 0;
-    while (count < 3)
+
+
+    if (!adminName.isEmpty() && !password.isEmpty())
     {
-        count++;
-        if (!adminName.isEmpty() && !password.isEmpty())
-        {
-            outStream << adminName << password;
-            socket.waitForBytesWritten();
-            socket.waitForReadyRead();
-            ok = serverResponse.toBool();
-            this->adminName = adminName;
-            break;
-        }
+        outStream << adminName << password;
+        socket.waitForBytesWritten();
+        socket.waitForReadyRead();
+        ok = serverResponse.toBool();
+        this->adminName = adminName;
+
     }
+
     clearScreen();
     return ok;
 }

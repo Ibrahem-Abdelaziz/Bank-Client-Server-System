@@ -53,13 +53,15 @@ void UserManager::viewAccount()
 void UserManager::getAccountNumber()
 {
     outStream << userName;
+    //socket.waitForReadyRead();
+    socket.waitForBytesWritten();
     socket.waitForReadyRead();
     qInfo() << "Your account number is: " << serverResponse.toString();
 }
 
 void UserManager::viewTransactionHistory()
 {
-    qInfo() << "Please send the number of transactions:";
+    qInfo() << "Please send the number of Account:";
     quint16 count;
     std::cin >> count;
     outStream << count;
@@ -102,18 +104,14 @@ bool UserManager::login()
 
     password = QString::fromStdString(pass);
     bool ok = false;
-    quint8 count = 0;
-    while (count < 3)
+
+    if (!userName.isEmpty() && !password.isEmpty())
     {
-        count++;
-        if (!userName.isEmpty() && !password.isEmpty())
-        {
-            outStream << userName << password;
-            socket.waitForBytesWritten();
-            socket.waitForReadyRead();
-            ok = serverResponse.toBool();
-            break;
-        }
+        outStream << userName << password;
+        socket.waitForBytesWritten();
+        socket.waitForReadyRead();
+        ok = serverResponse.toBool();
+
     }
     clearScreen();
     return ok;

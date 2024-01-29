@@ -33,7 +33,6 @@ void Server::disconnected()
 {
     QTcpSocket* socket=qobject_cast<QTcpSocket*>(sender());
     qInfo()<<"Disconnected"<<socket;
-    qInfo()<<"parent"<<socket->parent();
 }
 
 void Server::readyRead()
@@ -106,7 +105,7 @@ void Server::Handlerequest(QString request,QString role)
          outStream<<ok;
 
     }
-    else if(request=="GetAccNum")
+    else if(request=="GetAccNo")
     {
         QString username,accountnumber;
         inStream>>username;
@@ -142,7 +141,7 @@ void Server::Handlerequest(QString request,QString role)
             qint32 Balance =ViewAccBalance(accountnumber);
             outStream<<Balance;
         }
-        else if(request=="GetAccNum")
+        else if(request=="GetAccNo")
         {
             QString username,accountnumber;
             inStream>>username;

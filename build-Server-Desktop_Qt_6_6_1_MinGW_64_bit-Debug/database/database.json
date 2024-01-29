@@ -1,10 +1,34 @@
 {
     "1990": {
         "Accountnumber": "1990",
-        "Age": "33",
-        "Balance": "1000500",
+        "Age": "34",
+        "Balance": "1001800",
         "Fullname": "Ahmed Abdelaziz Ibrahem",
         "Transaction History": [
+            {
+                "datetime": "2024-01-12 20:06:12",
+                "details": "100 from 1998"
+            },
+            {
+                "datetime": "2024-01-12 14:11:22",
+                "details": "200 from 1998"
+            },
+            {
+                "datetime": "2024-01-12 13:59:50",
+                "details": "200 from 1998"
+            },
+            {
+                "datetime": "2024-01-11 13:58:43",
+                "details": "100 from 1998"
+            },
+            {
+                "datetime": "2024-01-11 00:30:46",
+                "details": "200 from 1998"
+            },
+            {
+                "datetime": "2024-01-10 15:19:31",
+                "details": "500 from 1998"
+            },
             {
                 "datetime": "2024-01-07 15:04:56",
                 "details": "500 from 1998"
@@ -14,10 +38,74 @@
     },
     "1998": {
         "Accountnumber": "1998",
-        "Age": "25",
-        "Balance": "2000500",
+        "Age": "26",
+        "Balance": "2000000",
         "Fullname": "Ibrahem Abdelaziz Ibrahem",
         "Transaction History": [
+            {
+                "datetime": "2024-01-12 20:17:13",
+                "details": "0"
+            },
+            {
+                "datetime": "2024-01-12 20:06:12",
+                "details": "100 to 1990"
+            },
+            {
+                "datetime": "2024-01-12 19:43:53",
+                "details": "0"
+            },
+            {
+                "datetime": "2024-01-12 19:43:02",
+                "details": "0"
+            },
+            {
+                "datetime": "2024-01-12 14:11:41",
+                "details": "+100"
+            },
+            {
+                "datetime": "2024-01-12 14:11:22",
+                "details": "200 to 1990"
+            },
+            {
+                "datetime": "2024-01-12 14:03:25",
+                "details": "500 from 1998"
+            },
+            {
+                "datetime": "2024-01-12 14:03:25",
+                "details": "500 to 1998"
+            },
+            {
+                "datetime": "2024-01-12 14:02:50",
+                "details": "+300"
+            },
+            {
+                "datetime": "2024-01-12 14:00:50",
+                "details": "+500"
+            },
+            {
+                "datetime": "2024-01-12 13:59:50",
+                "details": "200 to 1990"
+            },
+            {
+                "datetime": "2024-01-11 13:59:29",
+                "details": "+200"
+            },
+            {
+                "datetime": "2024-01-11 13:58:43",
+                "details": "100 to 1990"
+            },
+            {
+                "datetime": "2024-01-11 00:30:46",
+                "details": "200 to 1990"
+            },
+            {
+                "datetime": "2024-01-10 15:20:00",
+                "details": "+500"
+            },
+            {
+                "datetime": "2024-01-10 15:19:31",
+                "details": "500 to 1990"
+            },
             {
                 "datetime": "2024-01-07 20:10:53",
                 "details": "+500"
@@ -35,9 +123,9 @@
     },
     "9998": {
         "Accountnumber": "9998",
-        "Age": "25",
-        "Balance": "100000",
-        "Fullname": "Mohamed Adel",
-        "Username": "Adel"
+        "Age": "26",
+        "Balance": "2000",
+        "Fullname": "rmai mohamed",
+        "Username": "rami"
     }
 }

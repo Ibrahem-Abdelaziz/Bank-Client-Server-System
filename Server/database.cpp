@@ -15,6 +15,7 @@ DataBase::DataBase(QObject *parent)
 
 bool DataBase::CheckLogin(QString username, QString password)
 {
+    // qDebug() << login_data.fileName();
     if (!login_data.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "Error: Can't open the DataBase file";
         return false;
@@ -278,11 +279,11 @@ bool DataBase::MakeTransaction( qint32 TransactionAmount)
     QString oldBalance,Balance,details;
     oldBalance = GetField(AccNum,"Balance");
 	qint32 newBalance=oldBalance.toInt();
-	newBalance += TransactionAmount;
+    newBalance -= TransactionAmount;
 	Balance = QString::number(newBalance);
 	if(TransactionAmount>0)
 	{
-	 details = "+"+QString::number(TransactionAmount);
+     details = "+"+QString::number(TransactionAmount);
 	}
 	else
 	{
@@ -332,7 +333,6 @@ void DataBase::SaveTransaction( QString accountnumber,QString &TransactionDetail
 QString DataBase::ViewTransactionHistory(QString accountnumber,quint16 count)
 {
     QString error="This account doesn't have a Transaction Hisstory";
-    QString data;
     QString transactions;
 
     database.open(QIODevice::ReadOnly | QIODevice::Text);

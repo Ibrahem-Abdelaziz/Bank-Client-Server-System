@@ -1,0 +1,80 @@
+@startuml
+
+abstract class  "QObject" 
+QObject <|-- Client
+Client <|-- Admin 
+Client <|-- User
+
+
+class Client {
+    -QString role
+    -QString request
+    -QVariant serverResponse
+    -QString requestFlag
+    -QTcpSocket socket
+    -QDataStream outStream
+    -QDataStream inStream
+    
+    + getAccountNumber() 
+    + viewAccount() 
+    + viewTransactionHistory() 
+    + sendRequestToServer() 
+    + login() 
+    + clearScreen()
+}
+
+class Admin {
+..  Data members..
+
+    -QString adminName
+
+.. methods ..
+    +getAccountNumber()
+    +viewBankDatabase()
+    +createNewUser()
+    +deleteUser()
+    +updateUser()
+    +viewTransactionHistory()
+    +sendRequestToServer()
+    +login()
+    +start(bool&)
+.. slots..
+    +connectToHost(QString host, quint16 port)
+    +disconnect()
+    # connected()
+    # disconnected()
+    # error(QAbstractSocket::SocketError socketError)
+    # stateChanged(QAbstractSocket::SocketState socketState)
+    # readyRead()
+}
+
+
+
+
+class User {
+.. Data members..
+    -QString userName
+
+    -QString accountNumber
+.. methods ..
+    +transferAccount()
+    +makeTransaction()
+    +viewAccount()
+    +getAccountNumber()
+    +viewTransactionHistory()
+    +sendRequestToServer()
+    +bool login()
+    +quint8 userOptions()
+    +start(bool &isLogged)
+.. slots..
+    +connectToHost(QString host, quint16 port)
+    +disconnect()
+    # connected()
+    # disconnected()
+    # error(QAbstractSocket::SocketError socketError)
+    # stateChanged(QAbstractSocket::SocketState socketState)
+    # readyRead()
+}
+
+
+@enduml
